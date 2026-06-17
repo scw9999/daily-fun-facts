@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매일매일 랜덤 상식</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 인증(로그인/회원가입) 화면 -->
+    <div id="auth-container" class="container glass">
+        <h2>환영합니다!</h2>
+        <div class="auth-tabs">
+            <button id="tab-login" class="auth-tab-btn active">로그인</button>
+            <button id="tab-signup" class="auth-tab-btn">회원가입</button>
+        </div>
+
+        <!-- 로그인 폼 -->
+        <div id="login-form" class="auth-form">
+            <input type="text" id="login-id" placeholder="아이디를 입력하세요">
+            <input type="password" id="login-pw" placeholder="비밀번호를 입력하세요">
+            <button id="btn-login" class="tab-btn active">로그인</button>
+        </div>
+
+        <!-- 회원가입 폼 -->
+        <div id="signup-form" class="auth-form hidden">
+            <input type="text" id="signup-id" placeholder="사용할 아이디">
+            <input type="password" id="signup-pw" placeholder="비밀번호">
+            <input type="password" id="signup-pw-confirm" placeholder="비밀번호 확인">
+            <button id="btn-signup" class="tab-btn active">가입하기</button>
+        </div>
+    </div>
+
+    <!-- 메인 앱 화면 -->
+    <div id="app-container" class="container glass hidden">
+        <header>
+            <h1>💡 매일매일 랜덤 상식</h1>
+            <p id="user-greeting" style="font-weight:bold; margin-bottom: 10px;"></p>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="today">오늘의 상식</button>
+                <button class="tab-btn" data-tab="calendar">캘린더</button>
+                <button id="logout-btn" class="tab-btn" style="background:#ff7675; color:white;">로그아웃</button>
+            </div>
+        </header>
+
+        <!-- 오늘의 상식 탭 -->
+        <main id="today" class="tab-content active">
+            <div class="fact-card glass">
+                <span id="today-category" class="category-badge">로딩중...</span>
+                <h3 id="today-title" style="margin-top:15px;"></h3>
+                <p id="today-content" class="fact-content">데이터를 가져오는 중입니다. 잠시만 기다려주세요...</p>
+                <div class="fact-footer">
+                    <p id="today-wiki-warning" class="wiki-warning hidden">※ 위키백과 무작위 문서 추출 정보이므로 교차 검증이 필요할 수 있습니다.</p>
+                    <a id="today-source" href="#" target="_blank" class="source-link" style="display: none;">출처 확인하기</a>
+                </div>
+            </div>
+        </main>
+
+        <!-- 캘린더 탭 -->
+        <main id="calendar" class="tab-content hidden">
+            <div class="calendar-container glass">
+                <div class="calendar-header">
+                    <h2 id="month-year"></h2>
+                </div>
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 과거 상식 모달 -->
+    <div id="fact-modal" class="modal hidden">
+        <div class="modal-content glass">
+            <span class="close-btn">&times;</span>
+            <span id="modal-category" class="category-badge"></span>
+            <h3 id="modal-title" style="margin-top:15px;"></h3>
+            <p id="modal-fact"></p>
+            <p id="modal-wiki-warning" class="wiki-warning hidden">※ 위키백과 무작위 문서 추출 정보이므로 교차 검증이 필요할 수 있습니다.</p>
+            <a id="modal-source" href="#" target="_blank" class="source-link">출처 확인하기</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

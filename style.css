@@ -1,0 +1,222 @@
+:root {
+    --primary-color: #6c5ce7;
+    --bg-gradient: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    --text-color: #2d3436;
+}
+
+body {
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: var(--glass-shadow);
+}
+
+.container {
+    width: 90%;
+    max-width: 600px;
+    padding: 30px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+header h1 {
+    margin-bottom: 20px;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+/* 인증 폼 스타일 */
+.auth-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.auth-tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 10px;
+    font-size: 1.1em;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.auth-tab-btn.active {
+    opacity: 1;
+    font-weight: bold;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-form input {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.7);
+    font-size: 1em;
+}
+
+/* 탭 버튼 스타일 */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.tab-btn.active, .tab-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* 유틸리티 클래스 */
+.hidden {
+    display: none !important;
+}
+
+/* 상식 카드 스타일 */
+.fact-card {
+    padding: 40px 20px;
+    position: relative;
+}
+
+.category-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.fact-content {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin: 20px 0;
+}
+
+.fact-footer {
+    margin-top: 20px;
+}
+
+.wiki-warning {
+    color: #d63031;
+    font-size: 0.85em;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.source-link {
+    display: inline-block;
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    color: var(--text-color);
+    border-radius: 10px;
+    font-size: 0.9em;
+    transition: background 0.3s;
+}
+
+.source-link:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* 캘린더 스타일 */
+.calendar-container {
+    padding: 20px;
+}
+
+.calendar-header {
+    margin-bottom: 20px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.day {
+    padding: 15px 5px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: background 0.2s;
+    font-weight: bold;
+}
+
+.day.past:hover, .day.today:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: scale(1.05);
+}
+
+.day.today {
+    background: var(--primary-color);
+    color: white;
+}
+
+.day.future {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* 모달 스타일 */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    width: 80%;
+    max-width: 500px;
+    padding: 30px;
+    position: relative;
+    text-align: center;
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
