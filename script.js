@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 15가지 전체 분야 (비율을 맞추기 위한 기준)
     const CATEGORIES = ['철학', '문학', '역사', '경제', '사회', '정치', '심리학', '인류학', '자연과학', '공학', 'IT', '의학', '보건', '미술', '음악'];
 
-    // 비상용 지식 10개 목록 (서버 접속 장애 시 사용)
+    // 비상용 지식 10개 목록
     const FALLBACK_FACTS = [
         { category: '자연과학', title: '바나나의 진실', content: '바나나는 식물학적으로 베리(Berry)류에 속하지만, 정작 딸기는 베리류가 아닙니다.', source_url: 'https://ko.wikipedia.org/wiki/바나나' },
         { category: '자연과학', title: '문어의 심장', content: '문어는 심장이 3개이며, 피에 헤모시아닌이 포함되어 있어 붉은색이 아닌 푸른색을 띱니다.', source_url: 'https://ko.wikipedia.org/wiki/문어' },
@@ -21,6 +21,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 0. 유틸리티 함수 ---
     const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // 텍스트를 다듬고 최대 5문장으로 제한하는 함수
+    function formatFactText(text) {
+        if (!text) return "내용이 없습니다.";
+        
+        // 괄호 안의 발음기호나 한자 등 불필요한 정보 제거 (기본적인 정제)
+        let cleanedText = text.replace(/$$$[^)]*$$$/g, '');
+        
+        // 문장 단위(. ? !)로 분리
+        let sentences = cleanedText.match(/[^.!?]+[.!?]+/g) || [cleanedText];
+        
+        // 5문장이 넘어가면 자르기
+        if (sentences.length > 5) {
+            sentences = sentences.slice(0, 5);
+        }
+        
+        // 다시 합치고 공백 정리
+        let finalFact = sentences.join(' ').replace(/\s+/g, ' ').trim();
+        
+        return "흥미로운 사실을 알려드릴게요! " + finalFact;
+    }
 
     // --- 1. 인증(로그인/회원가입) 처리 ---
     const authContainer = document.getElementById('auth-container');
@@ -90,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCalendar();
     }
 
-    // 접속한 월의 빈 상식을 채움 (모든 분야가 1/15 비율로 동일하게 등장하도록 제어)
     async function fillMissingFacts() {
         const date = new Date();
         const year = date.getFullYear();
@@ -108,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!userData.facts[dateStr]) {
                 document.getElementById('today-content').textContent = `분야별 상식을 고르게 수집 중입니다... (${i}일 생성 중)`;
                 
-                // 15개 분야 중 하나를 꺼냄 (다 쓰면 다시 15개를 섞어서 채움 -> 정확히 1:1 비율 보장)
                 if (!userData.categoryQueue || userData.categoryQueue.length === 0) {
                     userData.categoryQueue = [...CATEGORIES].sort(() => Math.random() - 0.5);
                 }
@@ -133,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const randomSource = Math.random();
 
             try {
-                // 1. 타겟이 '역사'일 경우 전용 API 사용 (60% 확률)
+                // 1. 타겟이 '역사'일 경우 (Useless API 제거 후 비중 조정)
                 if (targetCategory === '역사' && randomSource < 0.6) {
                     const lang = Math.random() > 0.5 ? 'ko' : 'en';
                     const mm = String(month).padStart(2, '0');
@@ -146,14 +165,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         fact = {
                             category: targetCategory,
                             title: `${month}월 ${day}일의 역사 (${event.year || year}년)`,
-                            content: event.text,
+                            content: formatFactText(event.text),
                             source_url: event.pages[0]?.content_urls?.desktop?.page || `https://${lang}.wikipedia.org`,
                             is_wiki_random: false
                         };
                     }
                 }
-                // 2. 수학/과학 관련 분야일 경우 Numbers API 사용
-                else if (['자연과학', '공학', 'IT', '경제'].includes(targetCategory) && randomSource < 0.4) {
+                // 2. 수학/과학/경제 관련 분야일 경우 Numbers API 사용
+                else if (['자연과학', '공학', 'IT', '경제'].includes(targetCategory) && randomSource < 0.5) {
                     const type = Math.random() > 0.5 ? 'date' : 'math';
                     const targetUrl = type === 'date' ? `http://numbersapi.com/${month}/${day}/date?json` : `http://numbersapi.com/${day}/math?json`;
                     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
@@ -161,35 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = await res.json();
                     fact = {
                         category: targetCategory,
-                        title: type === 'date' ? `숫자 ${month}와 ${day}의 비밀` : `숫자 ${day}의 수학적 사실`,
-                        content: `${data.text} (원문 제공: Numbers API)`,
+                        title: type === 'date' ? `숫자 ${month}와 ${day}의 비밀` : `숫자 ${day}의 사실`,
+                        content: formatFactText(data.text),
                         source_url: 'http://numbersapi.com/',
                         is_wiki_random: false
                     };
                 }
-                // 3. 아주 엉뚱한 상식을 모든 분야에 10% 확률로 무작위 배정
-                else if (randomSource < 0.1) {
-                    const res = await fetch('https://uselessfacts.jsph.pl/api/v2/facts/random');
-                    const data = await res.json();
-                    fact = {
-                        category: targetCategory,
-                        title: '오늘의 엉뚱한 상식',
-                        content: `${data.text} (원문 제공: Useless Facts API)`,
-                        source_url: data.source_url || 'https://uselessfacts.jsph.pl/',
-                        is_wiki_random: false
-                    };
-                }
-                // 4. [핵심] 할당된 카테고리의 키워드로 위키백과를 직접 검색하여 연관 상식 추출
+                // 3. 할당된 카테고리의 키워드로 위키백과를 직접 검색하여 연관 상식 추출
                 else {
                     const searchKeywords = {
-                        '철학': '철학자 OR 철학 이론', '문학': '문학 소설 OR 시인', '역사': '역사 사건', 
-                        '경제': '경제 현상 OR 금융', '사회': '사회 현상 OR 문화', '정치': '정치 역사 OR 외교', 
-                        '심리학': '심리학 효과 OR 인지편향', '인류학': '인류학 OR 고고학', '자연과학': '과학 발견 OR 우주', 
-                        '공학': '공학 기술 OR 발명품', 'IT': '컴퓨터 소프트웨어 OR IT 기술', '의학': '의학 질병 OR 인체', 
-                        '보건': '보건 영양 OR 바이러스', '미술': '미술 화가 OR 명작', '음악': '음악가 OR 클래식 악기'
+                        '철학': '철학자 OR 철학 이론', '문학': '문학 작품 OR 소설가', '역사': '역사적 사건 OR 세계사', 
+                        '경제': '경제 현상 OR 금융', '사회': '사회 현상 OR 문화재', '정치': '정치사 OR 외교', 
+                        '심리학': '심리학 효과 OR 인지편향', '인류학': '인류학 OR 고고학', '자연과학': '과학 발견 OR 천문학', 
+                        '공학': '공학 기술 OR 발명품', 'IT': '소프트웨어 OR 컴퓨터 과학', '의학': '의학 질병 OR 인체', 
+                        '보건': '공중 보건 OR 영양학', '미술': '미술가 OR 서양미술', '음악': '음악가 OR 클래식 악기'
                     };
                     const query = searchKeywords[targetCategory] || targetCategory;
-                    const offset = Math.floor(Math.random() * 25); // 검색 결과 중 무작위 선택
+                    const offset = Math.floor(Math.random() * 20); // 검색 결과 중 무작위 선택
                     
                     const searchRes = await fetch(`https://ko.wikipedia.org/w/api.php?action=query&format=json&list=search&srsearch=${encodeURIComponent(query)}&srlimit=1&sroffset=${offset}&origin=*`);
                     const searchData = await searchRes.json();
@@ -202,15 +209,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         fact = {
                             category: targetCategory,
                             title: summaryData.title,
-                            content: summaryData.extract || "해당 문서의 요약이 존재하지 않습니다. 출처 링크를 통해 직접 확인해보세요!",
+                            content: formatFactText(summaryData.extract),
                             source_url: summaryData.content_urls?.desktop?.page || `https://ko.wikipedia.org/wiki/${encodeURIComponent(title)}`,
                             is_wiki_random: true
                         };
                     }
                 }
 
-                // 성공적으로 가져오고 중복이 아닐 경우 즉시 반환
-                if (fact && fact.content && !usedContents.has(fact.content)) {
+                if (fact && fact.content && fact.content !== "내용이 없습니다." && !usedContents.has(fact.content)) {
                     return fact;
                 }
             } catch (error) {
@@ -220,12 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
             await delay(300);
         }
 
-        // 3번 시도 모두 실패 시, 카테고리와 일치하는 비상용 지식 또는 랜덤 반환
         const fallbackFact = FALLBACK_FACTS.find(f => f.category === targetCategory) || FALLBACK_FACTS[Math.floor(Math.random() * FALLBACK_FACTS.length)];
         return {
-            category: targetCategory, // 시스템 할당 카테고리 유지 (비율 보장)
-            title: `[비상용] ${fallbackFact.title}`,
-            content: `서버 지연으로 내장된 상식을 제공합니다. ${fallbackFact.content}`,
+            category: targetCategory,
+            title: `[알아두면 좋은 상식] ${fallbackFact.title}`,
+            content: `흥미로운 사실을 알려드릴게요! ${fallbackFact.content}`,
             source_url: fallbackFact.source_url,
             is_wiki_random: false
         };
